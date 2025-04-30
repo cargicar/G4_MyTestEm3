@@ -23,42 +23,71 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm3/include/SteppingAction.hh
-/// \brief Definition of the SteppingAction class
+// $Id: RunData.cc 69223 2013-04-23 12:36:10Z gcosmo $
 //
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// \file RunData.cc
+/// \brief Implementation of the RunData class
 
-#ifndef SteppingAction_h
-#define SteppingAction_h 1
+#include "RunData.hh"
+#include "Analysis.hh"
 
-#include "G4UserSteppingAction.hh"
-#include "globals.hh"
-#include "G4AnalysisManager.hh"
-
-class DetectorConstruction;
-class EventAction;
+#include "G4RunManager.hh"
+#include "G4UnitsTable.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class SteppingAction : public G4UserSteppingAction
+RunData::RunData() : G4Run()//, fNumCells(4815)
 {
-  public:
-    SteppingAction(DetectorConstruction*, EventAction*);
-    ~SteppingAction() override = default;
-
-  void UserSteppingAction(const G4Step*) override;
-  int WhichZBin(double zpos);
-  int WhichXYbin(double xpos, double ypos, int zbin);
-
-    G4double BirksAttenuation(const G4Step*);
-
-  private:
-    DetectorConstruction* fDetector = nullptr;
-    EventAction* fEventAct = nullptr;
-};
+  // fVolumeNames[0] = "Absorber";
+  // fVolumeNames[1] = "Gap";
+ 
+  for ( G4int i=0; i < kNumCells; i++) {
+    fEdep[i] = 0.;
+    // fTrackLength[i] = 0.; 
+  }  
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif
+RunData::~RunData()
+{;}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void RunData::FillPerEvent()
+{
+  // get analysis manager
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  //accumulate statistic
+  //
+
+  for (int i = 0; i < kNumCells; ++i) {
+    // analysisManager->CreateNtupleDColumn("cell_" + std::to_string(i));
+    analysisManager->FillNtupleDColumn(i, fEdep[i]);
+  }
+  analysisManager->FillNtupleDColumn(kNumCells, GetTotalEnergy());
+
+  // for ( G4int i=0; i<kDim; i++) {
+  //   // fill histograms
+  //   // analysisManager->FillH1(i+1, fEdep[i]);
+  //   // analysisManager->FillH1(kDim+i+1, fTrackLength[i]);
+
+  //   // fill ntuple
+  //   analysisManager->FillNtupleDColumn(i, fEdep[i]);
+  //   analysisManager->FillNtupleDColumn(kDim+i, fTrackLength[i]);
+  // }  
+
+  analysisManager->AddNtupleRow();  
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void RunData::Reset()
+{ 
+  for ( G4int i=0; i<kNumCells; i++) {
+    fEdep[i] = 0.;
+    // fTrackLength[i] = 0.; 
+  }  
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

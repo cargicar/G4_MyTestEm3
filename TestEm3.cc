@@ -42,7 +42,30 @@
 #include "G4VisExecutive.hh"
 #include "Randomize.hh"
 
+//#ifdef G4MULTITHREADED
+//#include "G4MTRunManager.hh"
+//#else
+//#include "G4RunManager.hh"
+//#endif
+
+#include "G4UIcommand.hh"
+//#include "FTFP_BERT.hh"
+
+#include "time.h"
+#include <unistd.h>
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
+
+
+namespace {
+  void PrintUsage() {
+    G4cerr << " Usage: " << G4endl;
+    G4cerr << " examplea [-m macro ] [-u UIsession] [-t nThreads]" << G4endl;
+    G4cerr << "   note: -t option is available only for multi-threaded mode."
+           << G4endl;
+  }
+}
 
 int main(int argc, char** argv)
 {

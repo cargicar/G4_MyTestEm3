@@ -1,4 +1,4 @@
-//
+x//
 // ********************************************************************
 // * License and Disclaimer                                           *
 // *                                                                  *
@@ -23,42 +23,31 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm3/include/SteppingAction.hh
-/// \brief Definition of the SteppingAction class
 //
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// \file ActionInitialization.hh
+/// \brief Definition of the ActionInitialization class
 
-#ifndef SteppingAction_h
-#define SteppingAction_h 1
+#ifndef ActionInitialization_h
+#define ActionInitialization_h 1
 
-#include "G4UserSteppingAction.hh"
-#include "globals.hh"
-#include "G4AnalysisManager.hh"
+#include "G4VUserActionInitialization.hh"
 
 class DetectorConstruction;
-class EventAction;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// Action initialization class.
+///
 
-class SteppingAction : public G4UserSteppingAction
+class ActionInitialization : public G4VUserActionInitialization
 {
   public:
-    SteppingAction(DetectorConstruction*, EventAction*);
-    ~SteppingAction() override = default;
+    ActionInitialization(DetectorConstruction*);
+    ~ActionInitialization() override = default;
 
-  void UserSteppingAction(const G4Step*) override;
-  int WhichZBin(double zpos);
-  int WhichXYbin(double xpos, double ypos, int zbin);
-
-    G4double BirksAttenuation(const G4Step*);
+    void BuildForMaster() const override;
+    void Build() const override;
 
   private:
     DetectorConstruction* fDetector = nullptr;
-    EventAction* fEventAct = nullptr;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif

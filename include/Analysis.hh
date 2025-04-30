@@ -23,42 +23,16 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm3/include/SteppingAction.hh
-/// \brief Definition of the SteppingAction class
+// $Id: Analysis.hh 68058 2013-03-13 14:47:43Z gcosmo $
 //
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// \file Analysis.hh
+/// \brief Selection of the analysis technology
 
-#ifndef SteppingAction_h
-#define SteppingAction_h 1
+#ifndef Analysis_h
+#define Analysis_h 1
 
-#include "G4UserSteppingAction.hh"
-#include "globals.hh"
+//#include "g4root.hh"
 #include "G4AnalysisManager.hh"
-
-class DetectorConstruction;
-class EventAction;
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-class SteppingAction : public G4UserSteppingAction
-{
-  public:
-    SteppingAction(DetectorConstruction*, EventAction*);
-    ~SteppingAction() override = default;
-
-  void UserSteppingAction(const G4Step*) override;
-  int WhichZBin(double zpos);
-  int WhichXYbin(double xpos, double ypos, int zbin);
-
-    G4double BirksAttenuation(const G4Step*);
-
-  private:
-    DetectorConstruction* fDetector = nullptr;
-    EventAction* fEventAct = nullptr;
-};
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//#include "g4xml.hh"
 
 #endif
