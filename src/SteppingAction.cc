@@ -49,13 +49,8 @@ SteppingAction::SteppingAction(DetectorConstruction* det, EventAction* evt)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-SteppingAction::~SteppingAction()
-{ 
-}
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 // Bining
 int SteppingAction::WhichZBin(double zpos){
 
@@ -136,8 +131,20 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   // if World, return
   //
-  G4VPhysicalVolume* volume = prePoint1->GetTouchableHandle()->GetCopyNumber(0);
+  G4VPhysicalVolume* volume = prePoint1->GetTouchableHandle()->GetVolume();
+  // if sum of absorbers do not fill exactly a layer: check material, not volume.
+  const G4Material* mat = volume->GetLogicalVolume()->GetMaterial();
+  if (mat == fDetector->GetWorldMaterial()) return;
+
+  const G4StepPoint* endPoint = aStep->GetPostStepPoint();
+  const G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+
+  // here we are in an absorber. Locate it
+  //
+  G4int absorNum = prePoint1->GetTouchableHandle()->GetCopyNumber(0);
   G4int layerNum = prePoint1->GetTouchableHandle()->GetCopyNumber(1);
+
+int mybin = WhichXYbin(pos1.x(),pos1.y(),WhichZBin(pos1.z()));
     // int mybin = 0;
   //G4cout << "zbin " << WhichZBin(pos1.z()) << " " << mybin << " " << mybin%100 << std::endl;
 
@@ -181,11 +188,11 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   G4int plane;
   //
   // leaving the absorber ?
-  if (endPoint1->GetStepStatus() == fGeomBoundary) {
-    G4ThreeVector position = endPoint1->GetPosition();
-    G4ThreeVector direction = endPoint1->GetMomentumDirection();
+  if (endPoint->GetStepStatus() == fGeomBoundary) {
+    G4ThreeVector position = endPoint->GetPosition();
+    G4ThreeVector direction = endPoint->GetMomentumDirection();
     G4double sizeYZ = 0.5 * fDetector->GetCalorSizeYZ();
-    G4double Eflow = endPoint1->GetKineticEnergy();
+    G4double Eflow = endPoint->GetKineticEnergy();
     if (particle == G4Positron::Positron()) Eflow += 2 * electron_mass_c2;
     if ((std::abs(position.y()) >= sizeYZ) || (std::abs(position.z()) >= sizeYZ))
       run->SumLateralEleak(Idnow, Eflow);

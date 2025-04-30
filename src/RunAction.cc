@@ -31,6 +31,13 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "RunAction.hh"
+#include "RunData.hh"
+#include "Analysis.hh"
+
+#include "G4Run.hh"
+#include "G4UnitsTable.hh"
+#include "G4SystemOfUnits.hh"
+#include <sstream>
 
 #include "DetectorConstruction.hh"
 #include "HistoManager.hh"
@@ -45,17 +52,70 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
-  : fDetector(det), fPrimary(prim)
+  : fDetector(det), fPrimary(prim),  G4UserRunAction()
 {
   fRunMessenger = new RunActionMessenger(this);
   fHistoManager = new HistoManager();
+  // set printing event number per each event
+  G4RunManager::GetRunManager()->SetPrintProgress(1);     
+
+  // Create analysis manager
+  // The choice of analysis technology is done via selectin of a namespace
+  // in Analysis.hh
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  G4cout << "Using " << analysisManager->GetType() << G4endl;
+
+  // Create directories 
+  //analysisManager->SetHistoDirectoryName("histograms");
+  //analysisManager->SetNtupleDirectoryName("ntuple");
+  analysisManager->SetVerboseLevel(1);
+  analysisManager->SetFirstHistoId(1);
+
+  // Book histograms, ntuple
+  //
+  
+  // Creating histograms
+  // analysisManager->CreateH1("1","Edep in absorber", 100, 0., 800*MeV);
+  // analysisManager->CreateH1("2","Edep in gap", 100, 0., 100*MeV);
+  // analysisManager->CreateH1("3","trackL in absorber", 100, 0., 1*m);
+  // analysisManager->CreateH1("4","trackL in gap", 100, 0., 50*cm);
+
+  // Creating ntuple
+  //
+
+  char const* val = getenv("GAN_TREENAME"); 
+  std::string fname = (val == NULL ? std::string("fancy_tree") : std::string(val));
+
+
+  analysisManager->CreateNtuple(fname.c_str(), "Edep and TrackL");
+
+  int total_bins = 504 + 3;  // 3 overflow bins for the three calo layers
+
+  for (int i = 0; i < total_bins; ++i) {
+
+    std::stringstream out;
+    out << i;
+    analysisManager->CreateNtupleDColumn("cell_" + out.str());
+  }
+  analysisManager->CreateNtupleDColumn("TotalEnergy");
+  
+  // analysisManager->CreateNtupleDColumn("Eabs");
+  // analysisManager->CreateNtupleDColumn("Egap");
+  // analysisManager->CreateNtupleDColumn("Labs");
+  // analysisManager->CreateNtupleDColumn("Lgap");
+
+
+
+  analysisManager->FinishNtuple();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+
 RunAction::~RunAction()
 {
   delete fRunMessenger;
+  delete G4AnalysisManager::Instance();  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -63,8 +123,13 @@ RunAction::~RunAction()
 G4Run* RunAction::GenerateRun()
 {
   fRun = new Run(fDetector);
-  return fRun;
+  // drun = new RunData;
+  return fRun, new RunData;
 }
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -80,6 +145,16 @@ void RunAction::BeginOfRunAction(const G4Run*)
   // histograms
   //
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+
+  char const* val = getenv("GAN_FNAME"); 
+  //std::string fname = (val == NULL ? std::string("plz_work_kthxbai") : std::string(val));
+  std::string fname = (val == NULL ? std::string("calogan_interactive.root") : std::string(val));
+
+
+  G4String fileName = fname.c_str();
+  analysisManager->OpenFile(fileName);
+  
   if (analysis->IsActive()) analysis->OpenFile();
 
   // save Rndm status and open the timer
@@ -108,10 +183,13 @@ void RunAction::EndOfRunAction(const G4Run*)
   }
   // save histograms
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   if (analysis->IsActive()) {
     analysis->Write();
     analysis->CloseFile();
   }
+  analysisManager->Write();
+  analysisManager->CloseFile();
 
   // show Rndm status
   //  if (isMaster)  G4Random::showEngineStatus();
