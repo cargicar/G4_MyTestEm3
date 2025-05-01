@@ -82,14 +82,14 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
   // Create analysis manager
   // The choice of analysis technology is done via selectin of a namespace
   // in Analysis.hh
-  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  G4cout << "Using " << analysisManager->GetType() << G4endl;
+  G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+  G4cout << "Using " << analysis->GetType() << G4endl;
 
   // Create directories 
   //analysisManager->SetHistoDirectoryName("histograms");
   //analysisManager->SetNtupleDirectoryName("ntuple");
-  analysisManager->SetVerboseLevel(1);
-  analysisManager->SetFirstHistoId(1);
+  analysis->SetVerboseLevel(1);
+  analysis->SetFirstHistoId(1);
 
   // Book histograms, ntuple
   //
@@ -107,7 +107,7 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
   std::string fname = (val == NULL ? std::string("fancy_tree") : std::string(val));
 
 
-  analysisManager->CreateNtuple(fname.c_str(), "Edep and TrackL");
+  analysis->CreateNtuple(fname.c_str(), "Edep and TrackL");
 
   int total_bins = 504 + 3;  // 3 overflow bins for the three calo layers
 
@@ -115,12 +115,12 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
 
     std::stringstream out;
     out << i;
-    analysisManager->CreateNtupleDColumn("cell_" + out.str());
+    analysis->CreateNtupleDColumn("cell_" + out.str());
   }
-  analysisManager->CreateNtupleDColumn("TotalEnergy");
+  analysis->CreateNtupleDColumn("TotalEnergy");
   
 
-  analysisManager->FinishNtuple();
+  analysis->FinishNtuple();
   //....oooOO0OOooo........oooOO0OOooo.CaloGan END oooOO0OOooo........oooOO0OOooo......
 }
 
