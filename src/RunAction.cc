@@ -82,14 +82,14 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
   // Create analysis manager
   // The choice of analysis technology is done via selectin of a namespace
   // in Analysis.hh
-  G4AnalysisManager* analysis = G4AnalysisManager::Instance();
-  G4cout << "Using " << analysis->GetType() << G4endl;
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  G4cout << "Using " << analysisManager->GetType() << G4endl;
 
   // Create directories 
   //analysisManager->SetHistoDirectoryName("histograms");
   //analysisManager->SetNtupleDirectoryName("ntuple");
-  analysis->SetVerboseLevel(1);
-  analysis->SetFirstHistoId(1);
+  analysisManager->SetVerboseLevel(1);
+  analysisManager->SetFirstHistoId(1);
 
   // Book histograms, ntuple
   //
@@ -107,7 +107,7 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
   std::string fname = (val == NULL ? std::string("fancy_tree") : std::string(val));
 
 
-  analysis->CreateNtuple(fname.c_str(), "Edep and TrackL");
+  analysisManager->CreateNtuple(fname.c_str(), "Edep and TrackL");
 
   int total_bins = 504 + 3;  // 3 overflow bins for the three calo layers
 
@@ -115,12 +115,12 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
 
     std::stringstream out;
     out << i;
-    analysis->CreateNtupleDColumn("cell_" + out.str());
+    analysisManager->CreateNtupleDColumn("cell_" + out.str());
   }
-  analysis->CreateNtupleDColumn("TotalEnergy");
+  analysisManager->CreateNtupleDColumn("TotalEnergy");
   
 
-  analysis->FinishNtuple();
+  analysisManager->FinishNtuple();
   //....oooOO0OOooo........oooOO0OOooo.CaloGan END oooOO0OOooo........oooOO0OOooo......
 }
 
@@ -155,7 +155,7 @@ void RunAction::BeginOfRunAction(const G4Run*)
   // histograms
   //
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();
-
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   // CaloGan
   if (fMyRunData){
   
@@ -164,15 +164,15 @@ void RunAction::BeginOfRunAction(const G4Run*)
   std::string fname = (val == NULL ? std::string("calogan_bining.root") : std::string(val));
   G4String fileName = fname.c_str();
   //analysisManager->OpenFile(fileName);// CaloGan
-  if (analysis->IsActive()) {
+  if (analysisManager->IsActive()) {
   analysis->OpenFile(fileName);
     }
   }
   //
-  //if (analysis->IsActive()) {
-  // analysis->OpenFile();
+  if (analysis->IsActive()) {
+   analysis->OpenFile();
    
-  // }
+   }
   // save Rndm status and open the timer
 
   if (isMaster) {
@@ -199,9 +199,14 @@ void RunAction::EndOfRunAction(const G4Run*)
   }
   // save histograms
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   if (analysis->IsActive()) {
     analysis->Write();
     analysis->CloseFile();
+  }
+  if (analysisManager->IsActive()) {
+    analysisManager->Write();
+    analysisManager->CloseFile();
   }
 
   // show Rndm status
