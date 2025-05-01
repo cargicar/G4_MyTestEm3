@@ -23,55 +23,86 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm3/include/RunAction.hh
-/// \brief Definition of the RunAction class
-//
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// $Id: RunData.hh 69223 2013-04-23 12:36:10Z gcosmo $
+// 
+/// \file RunData.hh
+/// \brief Definition of the RunData class
 
-#ifndef RunAction_h
-#define RunAction_h 1
+#ifndef RunData_h
+#define RunData_h 1
 
-#include "G4UserRunAction.hh"
+#include "G4Run.hh"
 #include "globals.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class Run;
-class RunData; //CaloGan
-class DetectorConstruction;
-class PrimaryGeneratorAction;
-class RunActionMessenger;
-class HistoManager;
-class G4Timer;
+enum {
+  kAbs = 0,
+  kGap = 1,
+  kDim = 2, 
+  kNumCells = 504 + 3 // 3 overflow bins for the three calo layers
+};  
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+///  Run data class
+///
+/// It defines data members to hold the energy deposit and track lengths
+/// of charged particles in Absober and Gap layers.
+/// 
+/// In order to reduce the number of data members a 2-dimensions array 
+/// is introduced for each quantity:
+/// - fEdep[], fTrackLength[].
+///
+/// The data are collected step by step in SteppingAction, and
+/// the accumulated values are filled in histograms and entuple
+/// event by event in EventAction.
 
-class RunAction : public G4UserRunAction
+class RunData : public G4Run
 {
-  public:
-    RunAction(DetectorConstruction*, PrimaryGeneratorAction* prim = 0);
-    ~RunAction() override;
+public:
+  RunData();
+  virtual ~RunData();
 
-    G4Run* GenerateRun() override;
-    void BeginOfRunAction(const G4Run*) override;
-    void EndOfRunAction(const G4Run*) override;
+  // void Add(G4int id, G4double de, G4double dl);
+  void Add(G4int id, G4double de);
+  void FillPerEvent();
+  
+  void Reset();
 
-    // Acceptance parameters
-    void SetEdepAndRMS(G4int, G4double, G4double, G4double);
-    void SetApplyLimit(G4bool val);
+  // Get methods
+  // G4String  GetVolumeName(G4int id) const;
+  G4double  GetEdep(G4int id) const;
+  G4double GetTotalEnergy(){return TotalEnergy;};
+  void SetTotalEnergy(G4double e){TotalEnergy = e;};
+  // G4double  GetTrackLength(G4int id) const; 
 
-  private:
-    DetectorConstruction* fDetector = nullptr;
-    PrimaryGeneratorAction* fPrimary = nullptr;
-    Run* fRun = nullptr;
-    RunData* fMyRunData = nullptr; //CaloGan
-    RunActionMessenger* fRunMessenger = nullptr;
-    HistoManager* fHistoManager = nullptr;
-    G4Timer* fTimer = nullptr;
+private:
+  // G4String  fVolumeNames[kDim];
+  G4double  fEdep[kNumCells];
+  G4double TotalEnergy;
+  // G4double  fTrackLength[kDim];
 };
+
+// inline functions
+
+// inline void RunData::Add(G4int id, G4double de, G4double dl) {
+inline void RunData::Add(G4int id, G4double de) {
+  fEdep[id] += de; 
+  // fTrackLength[id] += dl;
+}
+
+// inline G4String  RunData::GetVolumeName(G4int id) const {
+//   return fVolumeNames[id];
+// }
+
+inline G4double  RunData::GetEdep(G4int id) const {
+  return fEdep[id];
+}   
+
+// inline G4double  RunData::GetTrackLength(G4int id) const {
+//   return fTrackLength[id];
+// }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif
+

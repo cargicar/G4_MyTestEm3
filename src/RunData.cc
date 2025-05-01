@@ -23,55 +23,71 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm3/include/RunAction.hh
-/// \brief Definition of the RunAction class
+// $Id: RunData.cc 69223 2013-04-23 12:36:10Z gcosmo $
 //
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// \file RunData.cc
+/// \brief Implementation of the RunData class
 
-#ifndef RunAction_h
-#define RunAction_h 1
+#include "RunData.hh"
+#include "Analysis.hh"
 
-#include "G4UserRunAction.hh"
-#include "globals.hh"
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-class Run;
-class RunData; //CaloGan
-class DetectorConstruction;
-class PrimaryGeneratorAction;
-class RunActionMessenger;
-class HistoManager;
-class G4Timer;
+#include "G4RunManager.hh"
+#include "G4UnitsTable.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class RunAction : public G4UserRunAction
+RunData::RunData() : G4Run()//, fNumCells(4815)
 {
-  public:
-    RunAction(DetectorConstruction*, PrimaryGeneratorAction* prim = 0);
-    ~RunAction() override;
-
-    G4Run* GenerateRun() override;
-    void BeginOfRunAction(const G4Run*) override;
-    void EndOfRunAction(const G4Run*) override;
-
-    // Acceptance parameters
-    void SetEdepAndRMS(G4int, G4double, G4double, G4double);
-    void SetApplyLimit(G4bool val);
-
-  private:
-    DetectorConstruction* fDetector = nullptr;
-    PrimaryGeneratorAction* fPrimary = nullptr;
-    Run* fRun = nullptr;
-    RunData* fMyRunData = nullptr; //CaloGan
-    RunActionMessenger* fRunMessenger = nullptr;
-    HistoManager* fHistoManager = nullptr;
-    G4Timer* fTimer = nullptr;
-};
+  // fVolumeNames[0] = "Absorber";
+  // fVolumeNames[1] = "Gap";
+ 
+  for ( G4int i=0; i < kNumCells; i++) {
+    fEdep[i] = 0.;
+    // fTrackLength[i] = 0.; 
+  }  
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif
+RunData::~RunData()
+{;}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void RunData::FillPerEvent()
+{
+  // get analysis manager
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  //accumulate statistic
+  //
+
+  for (int i = 0; i < kNumCells; ++i) {
+    // analysisManager->CreateNtupleDColumn("cell_" + std::to_string(i));
+    analysisManager->FillNtupleDColumn(i, fEdep[i]);
+  }
+  analysisManager->FillNtupleDColumn(kNumCells, GetTotalEnergy());
+
+  // for ( G4int i=0; i<kDim; i++) {
+  //   // fill histograms
+  //   // analysisManager->FillH1(i+1, fEdep[i]);
+  //   // analysisManager->FillH1(kDim+i+1, fTrackLength[i]);
+
+  //   // fill ntuple
+  //   analysisManager->FillNtupleDColumn(i, fEdep[i]);
+  //   analysisManager->FillNtupleDColumn(kDim+i, fTrackLength[i]);
+  // }  
+
+  analysisManager->AddNtupleRow();  
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void RunData::Reset()
+{ 
+  for ( G4int i=0; i<kNumCells; i++) {
+    fEdep[i] = 0.;
+    // fTrackLength[i] = 0.; 
+  }  
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

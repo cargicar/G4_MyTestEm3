@@ -35,6 +35,7 @@
 
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
+#include "G4AnalysisManager.hh" //Calogan
 
 class DetectorConstruction;
 class EventAction;
@@ -48,6 +49,8 @@ class SteppingAction : public G4UserSteppingAction
     ~SteppingAction() override = default;
 
     void UserSteppingAction(const G4Step*) override;
+    int WhichZBin(double zpos);
+    int WhichXYbin(double xpos, double ypos, int zbin);
 
     G4double BirksAttenuation(const G4Step*);
 

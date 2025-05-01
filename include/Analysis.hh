@@ -23,55 +23,16 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm3/include/RunAction.hh
-/// \brief Definition of the RunAction class
+// $Id: Analysis.hh 68058 2013-03-13 14:47:43Z gcosmo $
 //
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// \file Analysis.hh
+/// \brief Selection of the analysis technology
 
-#ifndef RunAction_h
-#define RunAction_h 1
+#ifndef Analysis_h
+#define Analysis_h 1
 
-#include "G4UserRunAction.hh"
-#include "globals.hh"
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-class Run;
-class RunData; //CaloGan
-class DetectorConstruction;
-class PrimaryGeneratorAction;
-class RunActionMessenger;
-class HistoManager;
-class G4Timer;
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-class RunAction : public G4UserRunAction
-{
-  public:
-    RunAction(DetectorConstruction*, PrimaryGeneratorAction* prim = 0);
-    ~RunAction() override;
-
-    G4Run* GenerateRun() override;
-    void BeginOfRunAction(const G4Run*) override;
-    void EndOfRunAction(const G4Run*) override;
-
-    // Acceptance parameters
-    void SetEdepAndRMS(G4int, G4double, G4double, G4double);
-    void SetApplyLimit(G4bool val);
-
-  private:
-    DetectorConstruction* fDetector = nullptr;
-    PrimaryGeneratorAction* fPrimary = nullptr;
-    Run* fRun = nullptr;
-    RunData* fMyRunData = nullptr; //CaloGan
-    RunActionMessenger* fRunMessenger = nullptr;
-    HistoManager* fHistoManager = nullptr;
-    G4Timer* fTimer = nullptr;
-};
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//#include "g4root.hh"
+#include "G4AnalysisManager.hh"
+//#include "g4xml.hh"
 
 #endif
