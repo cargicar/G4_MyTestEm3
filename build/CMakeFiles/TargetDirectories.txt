@@ -1,7 +1,0 @@
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/TestEm3.dir
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/edit_cache.dir
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/rebuild_cache.dir
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/list_install_components.dir
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/install.dir
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/install/local.dir
-/home/carlos/Rnet_local/GENAI_for_particle_phys/Geant4_exmaples/My_TestEm3/build/CMakeFiles/install/strip.dir
