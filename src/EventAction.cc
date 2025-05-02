@@ -31,6 +31,12 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "EventAction.hh"
+#include "RunData.hh"
+
+#include "G4UnitsTable.hh"
+
+#include "Randomize.hh"
+#include <iomanip>
 
 #include "HistoManager.hh"
 #include "Run.hh"
@@ -40,7 +46,10 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-EventAction::EventAction(DetectorConstruction* det) : fDetector(det) {}
+EventAction::EventAction(DetectorConstruction* det) :
+  fDetector(det),
+  G4UserEventAction()
+{}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -54,6 +63,12 @@ void EventAction::BeginOfEventAction(const G4Event*)
   // initialize EnergyLeakage per event
   //
   fEnergyLeak = 0.0;
+
+  // Calogan
+  RunData* runData 
+    = static_cast<RunData*>(
+        G4RunManager::GetRunManager()->GetNonConstCurrentRun());
+  runData->Reset();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -73,7 +88,7 @@ void EventAction::SumEnergyLeak(G4double eleak)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::EndOfEventAction(const G4Event*)
+void EventAction::EndOfEventAction(const G4Event* event)
 {
   // get Run
   Run* run = static_cast<Run*>(G4RunManager::GetRunManager()->GetNonConstCurrentRun());
@@ -87,13 +102,29 @@ void EventAction::EndOfEventAction(const G4Event*)
 
   run->SumEnergies(EdepTot, fEnergyLeak);
 
-  // histograms
+  // Calogan
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();
   analysis->FillH1(kMaxAbsor, EdepTot);
   G4int id = 2 * kMaxAbsor + 3;
   analysis->FillH1(id, fEnergyLeak);
   G4double ETot = EdepTot + fEnergyLeak;
   analysis->FillH1(++id, ETot);
+  
+  G4PrimaryVertex* primaryVertex = event->GetPrimaryVertex();
+  G4PrimaryParticle* primaryParticle = primaryVertex->GetPrimary();
+  G4double ke = primaryParticle->GetKineticEnergy()/1000.; //in GeV.
+
+  RunData* runData 
+    = static_cast<RunData*>(
+        G4RunManager::GetRunManager()->GetNonConstCurrentRun());
+  runData->SetTotalEnergy(ke);
+  runData->FillPerEvent();
+  
+  //print per event (modulo n)
+  //
+  G4int eventID = event->GetEventID();
+  G4int printModulo = G4RunManager::GetRunManager()->GetPrintProgress();
+ 
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

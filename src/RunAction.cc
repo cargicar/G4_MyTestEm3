@@ -196,6 +196,7 @@ void RunAction::EndOfRunAction(const G4Run*)
     }
     delete fTimer;
     fRun->EndOfRun();
+    
   }
   // save histograms
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();

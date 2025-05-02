@@ -62,7 +62,7 @@ SteppingAction::SteppingAction(DetectorConstruction* det, EventAction* evt)
 int SteppingAction::WhichZBin(double zpos){ //  CaloGan.SteppingAction
 
   //zsegmentation = TH1F("","",3,np.array([-240.,-150.,197.,240.]))
-   G4cout << "###### Zpos ###########" << zpos << G4endl; 
+  //G4cout << "###### Zpos ###########" << zpos << G4endl; 
   if (zpos < -150.) return 0;
   else if (zpos < 197.) return 1;
   else return 2;
